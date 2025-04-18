@@ -1,0 +1,10 @@
+flask
+requests
+beautifulsoup4
+dnspython
+selenium
+shodan
+PyQt6
+matplotlib
+pyvis
+reportlab

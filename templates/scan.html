@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Web Vulnerability Scanner</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #2b5485; }
+    form { margin-bottom: 20px; }
+    input[type="text"] { padding: 8px; width: 300px; }
+    button { padding: 8px 12px; }
+    .results { margin-top: 20px; }
+    .scan-category { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+    .scan-category h3 { margin: 0 0 5px; }
+    .errors { color: red; }
+    .subdomain-list { list-style-type: disc; margin-left: 20px; }
+    .payload-section { border: 1px dashed #aaa; margin: 10px 0; padding: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Web Vulnerability Scanner</h1>
+  <form action="{{ url_for('scan') }}" method="POST">
+    <input type="text" name="url" placeholder="Enter URL" required>
+    <button type="submit">Scan</button>
+  </form>
+  
+  {% if target %}
+    <h2>Scan Results for {{ target }}</h2>
+    <div class="results">
+      {% for scan, data in result.items() %}
+        <div class="scan-category">
+          <h3>{{ scan }}</h3>
+          <p>Status: {% if data.vulnerable %}❌ Vulnerable{% else %}✅ Safe{% endif %}</p>
+          
+          {% if scan == "Vulnerable Subdomains" and data.details %}
+            <p>Details:</p>
+            <ul class="subdomain-list">
+              {% for subdomain in data.details %}
+                <li>{{ subdomain }}</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p>Details:
+              {% if data.details %}
+                {% for detail in data.details %}
+                  {{ detail }}{% if not loop.last %}<br>{% endif %}
+                {% endfor %}
+              {% else %}
+                No details available.
+              {% endif %}
+            </p>
+          {% endif %}
+          
+          {% if data.errors %}
+            <p class="errors">Errors:
+              {% for error in data.errors %}
+                {{ error }}{% if not loop.last %}<br>{% endif %}
+              {% endfor %}
+            </p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+    
+    {% if xss_payloads %}
+      <div class="scan-category payload-section">
+        <h3>XSS Payloads Used</h3>
+        {% for payload in xss_payloads %}
+          <p>{{ payload }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+    
+  {% endif %}
+  
+</body>
+</html>
